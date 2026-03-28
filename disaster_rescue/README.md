@@ -2,6 +2,8 @@
 
 A complete AI-powered simulation system that demonstrates 5 core algorithms working together to save lives in a disaster-affected city.
 
+LIVE= https://aiml-project-7v2w.onrender.com
+
 ---
 
 ## ⚡ Quick Start
