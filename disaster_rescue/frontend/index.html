@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Disaster Response & Rescue Simulator</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Scanline overlay for CRT effect -->
+<div class="scanlines"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-icon">🚨</div>
+    <div>
+      <h1 class="title">AI RESCUE SIM</h1>
+      <p class="subtitle">Disaster Response Intelligence System</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-pill" id="sim-status">⬛ STANDBY</div>
+    <div class="step-counter">STEP <span id="step-num">000</span></div>
+  </div>
+</header>
+
+<!-- Main Layout -->
+<main class="main-layout">
+
+  <!-- LEFT: Controls + Stats -->
+  <aside class="sidebar left-sidebar">
+
+    <!-- Control Panel -->
+    <section class="panel control-panel">
+      <div class="panel-header">⚡ CONTROL PANEL</div>
+      <div class="btn-group">
+        <button class="btn btn-start" onclick="startSim()">
+          <span class="btn-icon">▶</span> START SIM
+        </button>
+        <button class="btn btn-step" onclick="nextStep()" id="btn-step" disabled>
+          <span class="btn-icon">⏭</span> NEXT STEP
+        </button>
+        <button class="btn btn-auto" onclick="autoRun()" id="btn-auto" disabled>
+          <span class="btn-icon">⚡</span> AUTO RUN
+        </button>
+        <button class="btn btn-reset" onclick="resetSim()">
+          <span class="btn-icon">↺</span> RESET
+        </button>
+      </div>
+      <div class="speed-control">
+        <label>AUTO SPEED</label>
+        <input type="range" id="speed-slider" min="100" max="1500" value="700" step="100">
+        <span id="speed-val">700ms</span>
+      </div>
+    </section>
+
+    <!-- Mission Stats -->
+    <section class="panel stats-panel">
+      <div class="panel-header">📊 MISSION STATS</div>
+      <div class="stats-grid">
+        <div class="stat-card rescued">
+          <div class="stat-icon">🧑‍🤝‍🧑</div>
+          <div class="stat-val" id="rescued-count">0</div>
+          <div class="stat-lbl">Rescued</div>
+        </div>
+        <div class="stat-card remaining">
+          <div class="stat-icon">⚠️</div>
+          <div class="stat-val" id="remaining-count">0</div>
+          <div class="stat-lbl">Remaining</div>
+        </div>
+        <div class="stat-card total">
+          <div class="stat-icon">👥</div>
+          <div class="stat-val" id="total-count">0</div>
+          <div class="stat-lbl">Total</div>
+        </div>
+      </div>
+      <div class="rescue-bar-wrap">
+        <div class="rescue-bar-label">RESCUE PROGRESS</div>
+        <div class="rescue-bar-track">
+          <div class="rescue-bar-fill" id="rescue-bar"></div>
+        </div>
+        <div class="rescue-pct" id="rescue-pct">0%</div>
+      </div>
+    </section>
+
+    <!-- Legend -->
+    <section class="panel legend-panel">
+      <div class="panel-header">🗺️ MAP LEGEND</div>
+      <div class="legend-items">
+        <div class="legend-item"><span class="legend-dot empty"></span>Empty Cell</div>
+        <div class="legend-item"><span class="legend-dot danger"></span>Danger Zone 🔥</div>
+        <div class="legend-item"><span class="legend-dot survivor"></span>Survivor 🟡</div>
+        <div class="legend-item"><span class="legend-dot base"></span>Rescue Base 🔵</div>
+        <div class="legend-item"><span class="legend-dot agent"></span>AI Agent 🤖</div>
+        <div class="legend-item"><span class="legend-dot path"></span>Path Taken</div>
+        <div class="legend-item"><span class="legend-dot visited"></span>Explored</div>
+      </div>
+    </section>
+
+  </aside>
+
+  <!-- CENTER: Grid Map -->
+  <section class="center-panel">
+    <div class="grid-header">
+      <div class="grid-title">🌆 DISASTER CITY MAP</div>
+      <div class="coords-display" id="hover-coords">Hover over cells</div>
+    </div>
+    <div class="grid-container">
+      <div class="grid" id="grid"></div>
+    </div>
+    <!-- Message Bar -->
+    <div class="message-bar" id="message-bar">
+      <span class="msg-icon">📡</span>
+      <span id="msg-text">Initialize simulation to begin rescue operations.</span>
+    </div>
+  </section>
+
+  <!-- RIGHT: Algorithm Panel -->
+  <aside class="sidebar right-sidebar">
+
+    <!-- Active Algorithm -->
+    <section class="panel algo-panel">
+      <div class="panel-header">🧠 ACTIVE ALGORITHM</div>
+      <div class="algo-display" id="algo-display">
+        <div class="algo-name" id="algo-name">STANDBY</div>
+        <div class="algo-desc" id="algo-desc">Awaiting simulation start...</div>
+      </div>
+      <div class="algo-metrics">
+        <div class="metric">
+          <span class="metric-lbl">BFS Nodes</span>
+          <span class="metric-val" id="bfs-nodes">-</span>
+        </div>
+        <div class="metric">
+          <span class="metric-lbl">A* Path Len</span>
+          <span class="metric-val" id="astar-path">-</span>
+        </div>
+        <div class="metric">
+          <span class="metric-lbl">Minimax Nodes</span>
+          <span class="metric-val" id="minimax-nodes">-</span>
+        </div>
+        <div class="metric">
+          <span class="metric-lbl">A* Explored</span>
+          <span class="metric-val" id="astar-explored">-</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Minimax Decision Tree -->
+    <section class="panel decision-panel">
+      <div class="panel-header">⚖️ MINIMAX DECISIONS</div>
+      <div class="action-scores" id="action-scores">
+        <div class="scores-placeholder">Run simulation to see decisions...</div>
+      </div>
+    </section>
+
+    <!-- Decision Log -->
+    <section class="panel log-panel">
+      <div class="panel-header">📋 DECISION LOG</div>
+      <div class="log-container" id="decision-log">
+        <div class="log-entry placeholder-log">Simulation not started yet...</div>
+      </div>
+    </section>
+
+  </aside>
+
+</main>
+
+<!-- Algorithm Info Modal Trigger -->
+<button class="info-fab" onclick="toggleAlgoInfo()">?</button>
+
+<!-- Algorithm Info Panel -->
+<div class="algo-info-overlay" id="algo-info-overlay" onclick="toggleAlgoInfo()">
+  <div class="algo-info-modal" onclick="event.stopPropagation()">
+    <button class="close-modal" onclick="toggleAlgoInfo()">✕</button>
+    <h2>🧠 Algorithm Reference</h2>
+    <div class="algo-cards" id="algo-cards-content">Loading...</div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
