@@ -232,8 +232,4 @@ STEP:
 
 
 
-**Q: What is the heuristic in A*?**  
-A: Manhattan Distance = |Δrow| + |Δcol|. It's admissible (never overestimates actual cost on a grid with no diagonal moves), so A* remains optimal.
 
-**Q: How does Alpha-Beta improve Minimax?**  
-A: It prunes branches where we already know a better move exists. If MAX already has a score of 5, and MIN can force the score below 3 in another branch, that branch can never be chosen by MAX — so we skip it.
